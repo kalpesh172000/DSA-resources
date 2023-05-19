@@ -1,14 +1,17 @@
 import java.io.File;
+import java.io.FileReader;
 import java.util.PriorityQueue;
 import java.util.Scanner;
+import com.opencsv.CSVReader;
 
-class GraphNode
+
+class Node
 {
     public
     int vertex;
     int time;
-    GraphNode next;
-    GraphNode(int vertex,int time)
+    Node next;
+    Node(int vertex, int time)
     {
         this.vertex=vertex;
         this.next=null;
@@ -17,28 +20,26 @@ class GraphNode
     int getVertex() { return vertex;}
     int getTime() { return time;}
 }
-class DijkstraAlgorithm
+
+
+public class CSVDijkstra
 {
     static final int maxSize = 9;
-    GraphNode[] head=new GraphNode[maxSize];
+    Node[] head=new Node[maxSize];
     void getList()
     {
         int vertex1,vertex2,time;
+        CSVReader reader = null;
         try
         {
-            File fin=new File("graphdata\\numPath");
-            if(!fin.exists())
+            reader = new CSVReader(new FileReader("graphdata\\graphdata.csv"));
+            String[] nextLine;
+            while ((nextLine = reader.readNext()) != null)
             {
-                System.out.print("\nfile doesn't exit");
-                System.exit(0);
-            }
-
-            Scanner scanner = new Scanner(fin);
-            while(scanner.hasNextInt())
-            {
-                vertex1=scanner.nextInt();
-                vertex2=scanner.nextInt();
-                time=scanner.nextInt();
+                vertex1=Integer.parseInt(nextLine[0]);
+                vertex2=Integer.parseInt(nextLine[1]);
+                time=Integer.parseInt(nextLine[2]);
+                System.out.print("\n"+vertex1+" "+vertex2+" "+time);
                 insert(vertex1,vertex2,time);
             }
         }
@@ -52,9 +53,9 @@ class DijkstraAlgorithm
 
     void insert(int vertex1,int vertex2,int time)
     {
-        GraphNode temp,current;
+        Node temp,current;
 
-        temp=new GraphNode(vertex1,time);
+        temp=new Node(vertex1,time);
         if(head[vertex2]==null)
         {
             head[vertex2]=temp;
@@ -67,7 +68,7 @@ class DijkstraAlgorithm
             current.next=temp;
         }
 
-        temp=new GraphNode(vertex2,time);
+        temp=new Node(vertex2,time);
         if(head[vertex1]==null)
         {
             head[vertex1]=temp;
@@ -84,7 +85,7 @@ class DijkstraAlgorithm
 
     void display()
     {
-        GraphNode current;
+        Node current;
         for(int i=0;i<maxSize;i++)
         {
             current=head[i];
@@ -101,27 +102,27 @@ class DijkstraAlgorithm
     void dijkstra(int source)
     {
 
-        GraphNode temp;
+        Node temp;
         int[] distance=new int[maxSize];
         for(int i=0;i<maxSize;i++)
             distance[i]=Integer.MAX_VALUE;
 
         distance[source]=0;
 
-        PriorityQueue<GraphNode> pq=new PriorityQueue<>((v1, v2)-> v1.getTime()-v2.getTime());
+        PriorityQueue<Node> pq=new PriorityQueue<>((v1, v2)-> v1.getTime()-v2.getTime());
 
-        pq.add(new GraphNode(source,0));
+        pq.add(new Node(source,0));
 
         while (pq.size()>0)
         {
-            GraphNode current=pq.poll();
+            Node current=pq.poll();
             temp=head[current.vertex];
             while(temp!=null)
             {
                 if( distance[current.vertex]+temp.time < distance[temp.vertex] )
                 {
                     distance[temp.vertex]=distance[current.vertex]+temp.time;
-                    pq.add(new GraphNode(temp.vertex,distance[temp.vertex]));
+                    pq.add(new Node(temp.vertex,distance[temp.vertex]));
                 }
                 temp=temp.next;
             }
@@ -141,7 +142,7 @@ class DijkstraAlgorithm
 
     public static void main(String [] args)
     {
-        DijkstraAlgorithm d=new DijkstraAlgorithm();
+        CSVDijkstra d=new CSVDijkstra();
         d.getList();
         d.display();
         d.dijkstra(0);
